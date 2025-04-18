@@ -90,7 +90,16 @@ app.get("/:title", async (req, res) => {
     }
 });
 
-var PORT = 3000;
-app.listen(PORT, () => {
+app.get('/health', (req, res) => {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    res.json({ 
+        status: 'ok',
+        timestamp: new Date(),
+        database: dbStatus
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is Running at ${PORT}`);
 });
