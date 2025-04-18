@@ -19,13 +19,29 @@ process.on('uncaughtException', (error) => {
     console.log('Uncaught Exception:', error);
 });
 
-mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 10000,
+}).then(() => {
+    console.log("Successfully connected to MongoDB.");
+}).catch((err) => {
+    console.error("MongoDB connection error:", err);
+});
+
 const bdociSchema = new mongoose.Schema({
     title: String,
     document: String,
     code: String,
 });
 const doc = mongoose.model("Doc", bdociSchema);
+
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
 
 app.get("/", async (req, res) => {
     try {
@@ -76,7 +92,7 @@ app.get("/:title", async (req, res) => {
         const document = await doc.findOne({ title: requestedTitle });
 
         if (!document) {
-            return res.status(404).render("404"); // You'll need to create a 404 page
+            return res.status(404).render("404");
         }
 
         res.render("index", {
@@ -99,7 +115,28 @@ app.get('/health', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is Running at ${PORT}`);
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        environment: process.env.NODE_ENV,
+        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        timestamp: new Date().toISOString()
+    });
 });
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+// Update your listen method
+const PORT = process.env.PORT || 3000;
+if (!process.env.VERCEL) {  // Only listen when not on Vercel
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server is Running at ${PORT}`);
+    });
+}
+
+// Add this line at the end of your file
+module.exports = app;  // Required for Vercel

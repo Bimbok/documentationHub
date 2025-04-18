@@ -11,10 +11,5 @@
             "src": "/(.*)",
             "dest": "app.js"
         }
-    ],
-    "env": {
-        "MONGODB_URI": "@mongodb_uri",
-        "ADMIN_USERNAME": "@admin_username",
-        "ADMIN_PASSWORD": "@admin_password"
-    }
+    ]
 }
