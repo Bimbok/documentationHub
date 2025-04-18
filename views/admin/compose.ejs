@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Create Documentation</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --card-border-color: rgba(0,0,0,0.125);
+        }
+        
+        [data-bs-theme="dark"] {
+            --card-border-color: rgba(255,255,255,0.125);
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            border-color: var(--card-border-color);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        textarea {
+            resize: vertical;
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .theme-toggle .btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle .btn:hover {
+            transform: rotate(45deg);
+        }
+        
+        /* Dark theme specific styles */
+        [data-bs-theme="dark"] .card {
+            background-color: #2b3035;
+        }
+        
+        [data-bs-theme="dark"] textarea,
+        [data-bs-theme="dark"] input {
+            background-color: #1a1d20 !important;
+            border-color: #495057;
+            color: #e9ecef !important;
+        }
+        
+        [data-bs-theme="dark"] textarea:focus,
+        [data-bs-theme="dark"] input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
+</head>
+
+<body class="bg-body">
+    <!-- Theme Toggle Button -->
+    <div class="theme-toggle animate__animated animate__fadeIn">
+        <button class="btn btn-primary shadow-lg" id="themeToggle">
+            <i class="bi bi-sun-fill" id="themeIcon"></i>
+        </button>
+    </div>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg animate__animated animate__fadeIn">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0 text-center">Create Documentation</h2>
+                    </div>
+                    <div class="card-body">
+                        <form action="/compose" method="post" class="needs-validation" novalidate>
+                            <div class="mb-4 animate__animated animate__fadeInUp">
+                                <label for="title" class="form-label">Documentation Title</label>
+                                <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                    placeholder="Enter documentation title" required>
+                            </div>
+
+                            <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                                <label for="doc" class="form-label">Documentation Content</label>
+                                <textarea class="form-control" id="doc" name="doc" rows="8"
+                                    placeholder="Write your documentation here..." required></textarea>
+                            </div>
+
+                            <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                                <label for="code" class="form-label">Code Snippet</label>
+                                <textarea class="form-control font-monospace" id="code" name="code" rows="8"
+                                    placeholder="Paste your code here..." spellcheck="false"></textarea>
+                            </div>
+
+                            <div class="text-center animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                                    <i class="bi bi-cloud-upload"></i> Publish Documentation
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-bs-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+            
+            // Add animation to theme toggle button
+            themeToggle.classList.add('animate__animated', 'animate__rubberBand');
+            setTimeout(() => {
+                themeToggle.classList.remove('animate__animated', 'animate__rubberBand');
+            }, 1000);
+        });
+        
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
+        }
+        
+        // Form validation
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+</body>
+
+</html>
