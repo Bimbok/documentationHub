@@ -11,6 +11,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "ejs");
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.log('Uncaught Exception:', error);
+});
+
 mongoose.connect(process.env.MONGODB_URI);
 const bdociSchema = new mongoose.Schema({
     title: String,
