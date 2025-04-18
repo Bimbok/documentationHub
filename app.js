@@ -11,6 +11,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set('views', path.join(__dirname, 'views'));
 app.set("view engine", "ejs");
 
+// Add this after your other middleware configurations
+app.use(express.static("public"));
+
 process.on('unhandledRejection', (reason, promise) => {
     console.log('Unhandled Rejection at:', promise, 'reason:', reason);
 });
