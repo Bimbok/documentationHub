@@ -1,4 +1,4 @@
-# bDoci
+# Documentation Hub 
 
 Documentation Hub  is a dynamic, MongoDB-powered documentation platform that empowers you to create, manage, and share technical docs and code snippets with clarity and ease. Built for collaboration, bDoci helps you organize ideas, inspire innovation, and streamline your documentation workflow.
 
