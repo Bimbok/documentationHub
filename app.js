@@ -1,5 +1,4 @@
 require("dotenv").config();
-require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -8,48 +7,78 @@ const path = require("path");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set('views', path.join(__dirname, 'views'));
+app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-
-// Add this after your other middleware configurations
 app.use(express.static(path.join(__dirname, "public")));
 
-process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+// Process error handlers
+process.on("unhandledRejection", (reason, promise) => {
+    console.log("Unhandled Rejection at:", promise, "reason:", reason);
 });
 
-process.on('uncaughtException', (error) => {
-    console.log('Uncaught Exception:', error);
+process.on("uncaughtException", (error) => {
+    console.log("Uncaught Exception:", error);
 });
 
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-    connectTimeoutMS: 10000,
-}).then(() => {
-    console.log("Successfully connected to MongoDB.");
-}).catch((err) => {
-    console.error("MongoDB connection error:", err);
-});
+// MongoDB connection
+mongoose
+    .connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+        connectTimeoutMS: 10000,
+    })
+    .then(() => {
+        console.log("Successfully connected to MongoDB.");
+    })
+    .catch((err) => {
+        console.error("MongoDB connection error:", err);
+    });
 
+// Schema with category field
 const bdociSchema = new mongoose.Schema({
     title: String,
     document: String,
     code: String,
+    category: {
+        type: String,
+        default: "Uncategorized",
+    },
 });
-const doc = mongoose.model("Doc", bdociSchema);
+const Doc = mongoose.model("Doc", bdociSchema);
 
-app.use((req, res, next) => {
+// Middleware to get categories dynamically
+app.use(async (req, res, next) => {
     console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+
+    try {
+        // Get all unique categories from database
+        const categories = await Doc.distinct("category");
+        res.locals.categories = categories.sort(); // Make categories available in all templates
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+        res.locals.categories = ["Uncategorized"];
+    }
     next();
 });
 
+// Routes
 app.get("/", async (req, res) => {
     try {
-        const documents = await doc.find({}).sort({ title: 1 }); // Sort alphabetically by title
-        res.render("home", { documents });
+        const { category } = req.query;
+        let filter = {};
+
+        // Filter by category if provided
+        if (category && category !== "all") {
+            filter.category = category;
+        }
+
+        const documents = await Doc.find(filter).sort({ title: 1 });
+        res.render("home", {
+            documents,
+            selectedCategory: category || "all",
+        });
     } catch (error) {
         console.error("Error fetching documents:", error);
         res.status(500).send("Error loading documentation list");
@@ -62,8 +91,10 @@ app.get("/admin", (req, res) => {
 
 app.post("/admin", async (req, res) => {
     try {
-        if (req.body.adminName === process.env.ADMIN_USERNAME && 
-            req.body.password === process.env.ADMIN_PASSWORD) {
+        if (
+            req.body.adminName === process.env.ADMIN_USERNAME &&
+            req.body.password === process.env.ADMIN_PASSWORD
+        ) {
             res.render("admin/compose");
         } else {
             return res.status(401).send("Invalid credentials");
@@ -76,10 +107,11 @@ app.post("/admin", async (req, res) => {
 
 app.post("/compose", async (req, res) => {
     try {
-        const document = new doc({
+        const document = new Doc({
             title: req.body.title,
             document: req.body.doc,
             code: req.body.code,
+            category: req.body.newCategory || "Uncategorized",
         });
         await document.save();
         res.render("admin/compose");
@@ -92,7 +124,7 @@ app.post("/compose", async (req, res) => {
 app.get("/:title", async (req, res) => {
     try {
         const requestedTitle = req.params.title;
-        const document = await doc.findOne({ title: requestedTitle });
+        const document = await Doc.findOne({ title: requestedTitle });
 
         if (!document) {
             return res.status(404).render("404");
@@ -102,6 +134,7 @@ app.get("/:title", async (req, res) => {
             title: document.title,
             documentation: document.document,
             code: document.code,
+            category: document.category,
         });
     } catch (error) {
         console.error("Error fetching document:", error);
@@ -109,37 +142,39 @@ app.get("/:title", async (req, res) => {
     }
 });
 
-app.get('/health', (req, res) => {
-    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-    res.json({ 
-        status: 'ok',
-        timestamp: new Date(),
-        database: dbStatus
-    });
-});
-
-app.get('/api/health', (req, res) => {
+// Health check endpoints
+app.get("/health", (req, res) => {
+    const dbStatus =
+        mongoose.connection.readyState === 1 ? "connected" : "disconnected";
     res.json({
-        status: 'ok',
-        environment: process.env.NODE_ENV,
-        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        timestamp: new Date().toISOString()
+        status: "ok",
+        timestamp: new Date(),
+        database: dbStatus,
     });
 });
 
-// Add error handling middleware
+app.get("/api/health", (req, res) => {
+    res.json({
+        status: "ok",
+        environment: process.env.NODE_ENV,
+        mongodb:
+            mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// Error handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).send("Something broke!");
 });
 
-// Update your listen method
+// Start server
 const PORT = process.env.PORT || 3000;
-if (!process.env.VERCEL) {  // Only listen when not on Vercel
-    app.listen(PORT, '0.0.0.0', () => {
+if (!process.env.VERCEL) {
+    app.listen(PORT, "0.0.0.0", () => {
         console.log(`Server is Running at ${PORT}`);
     });
 }
 
-// Add this line at the end of your file
-module.exports = app;  // Required for Vercel
+module.exports = app;

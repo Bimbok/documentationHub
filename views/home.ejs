@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +17,7 @@
             right: 20px;
             z-index: 1000;
         }
-        
+
         .theme-toggle .btn {
             width: 50px;
             height: 50px;
@@ -28,7 +29,7 @@
             font-size: 1.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .theme-toggle .btn:hover {
             transform: rotate(45deg);
         }
@@ -41,12 +42,31 @@
 
         .doc-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
         .search-box {
             max-width: 500px;
             margin: 0 auto;
+        }
+
+        /* Category filter styles */
+        .category-filter {
+            margin-bottom: 2rem;
+        }
+
+        .category-badge {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .category-badge.active {
+            background-color: #0d6efd !important;
+            border-color: #0d6efd !important;
         }
 
         /* Dark mode specific styles */
@@ -80,8 +100,15 @@
             text-align: center;
             padding: 2rem;
         }
+
+        .doc-category {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 </head>
+
 <body class="bg-light">
     <!-- Theme Toggle Button -->
     <div class="theme-toggle">
@@ -97,26 +124,44 @@
     </nav>
 
     <div class="container py-5">
+        <!-- Category Filter -->
+        <div class="category-filter text-center mb-4">
+            <h5 class="mb-3">Filter by Category:</h5>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <span class="badge bg-secondary category-badge active" data-category="all">
+                    All Categories
+                </span>
+                <% categories.forEach(function(cat) { %>
+                    <span class="badge bg-primary category-badge" data-category="<%= cat %>">
+                        <%= cat %>
+                    </span>
+                    <% }); %>
+            </div>
+        </div>
+
         <!-- Search Box -->
         <div class="search-box mb-5">
             <div class="input-group">
                 <span class="input-group-text bg-primary text-white">
                     <i class="bi bi-search"></i>
                 </span>
-                <input type="text" 
-                       class="form-control form-control-lg" 
-                       id="searchInput" 
-                       placeholder="Search documentation..."
-                       autocomplete="off">
+                <input type="text" class="form-control form-control-lg" id="searchInput"
+                    placeholder="Search documentation..." autocomplete="off">
             </div>
         </div>
 
         <!-- Documentation Grid -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="docsGrid">
-            <% if (documents && documents.length > 0) { %>
+            <% if (documents && documents.length> 0) { %>
                 <% documents.forEach(function(doc) { %>
-                    <div class="col doc-item">
-                        <div class="card doc-card shadow-sm h-100" onclick="window.location.href='/<%= doc.title %>'">
+                    <div class="col doc-item" data-category="<%= doc.category || 'Uncategorized' %>">
+                        <div class="card doc-card shadow-sm h-100 position-relative"
+                            onclick="window.location.href='/<%= doc.title %>'">
+                            <!-- Category Badge -->
+                            <!-- <span class="badge bg-info doc-category">
+                                <%= doc.category || 'Uncategorized' %>
+                            </span> -->
+
                             <div class="card-body">
                                 <h5 class="card-title">
                                     <i class="bi bi-file-text me-2 text-primary"></i>
@@ -134,14 +179,14 @@
                             </div>
                         </div>
                     </div>
-                <% }); %>
-            <% } else { %>
-                <div class="col-12 text-center">
-                    <div class="alert alert-info">
-                        No documentation available yet.
-                    </div>
-                </div>
-            <% } %>
+                    <% }); %>
+                        <% } else { %>
+                            <div class="col-12 text-center">
+                                <div class="alert alert-info">
+                                    No documentation available yet.
+                                </div>
+                            </div>
+                            <% } %>
         </div>
 
         <!-- No Results Message -->
@@ -155,27 +200,27 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         // Theme Toggle Logic
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const html = document.documentElement;
-        
+
         // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-bs-theme', savedTheme);
         updateThemeIcon(savedTheme);
-        
+
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
+
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
         });
-        
+
         function updateThemeIcon(theme) {
             themeIcon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
         }
@@ -185,16 +230,50 @@
         const docsGrid = document.getElementById('docsGrid');
         const noResults = document.getElementById('noResults');
         const docItems = document.querySelectorAll('.doc-item');
+        const categoryBadges = document.querySelectorAll('.category-badge');
 
-        searchInput.addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        // Current filter state
+        let currentCategory = 'all';
+        let currentSearchTerm = '';
+
+        // Category filter functionality
+        categoryBadges.forEach(badge => {
+            badge.addEventListener('click', function () {
+                const category = this.getAttribute('data-category');
+
+                // Update active state
+                categoryBadges.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                currentCategory = category;
+                filterDocuments();
+            });
+        });
+
+        // Search functionality
+        searchInput.addEventListener('input', function (e) {
+            currentSearchTerm = e.target.value.toLowerCase();
+            filterDocuments();
+        });
+
+        // Combined filter function
+        function filterDocuments() {
             let hasResults = false;
 
             docItems.forEach(item => {
+                const itemCategory = item.getAttribute('data-category');
                 const title = item.querySelector('.card-title').textContent.toLowerCase();
                 const content = item.querySelector('.card-text').textContent.toLowerCase();
 
-                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                // Check category filter
+                const categoryMatch = currentCategory === 'all' || itemCategory === currentCategory;
+
+                // Check search filter
+                const searchMatch = currentSearchTerm === '' ||
+                    title.includes(currentSearchTerm) ||
+                    content.includes(currentSearchTerm);
+
+                if (categoryMatch && searchMatch) {
                     item.style.display = '';
                     hasResults = true;
                 } else {
@@ -203,7 +282,11 @@
             });
 
             noResults.style.display = hasResults ? 'none' : 'block';
-        });
+        }
+
+        // Initialize filter on page load
+        filterDocuments();
     </script>
 </body>
-</html> 
+
+</html>
