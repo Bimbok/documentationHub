@@ -4,253 +4,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Create Documentation</title>
+    <title>Create Documentation - bDoci</title>
+    <link rel="icon" type="image/x-icon" href="logo/bimbokdocs.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- Animate.css for animations -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <style>
         :root {
-            --card-border-color: rgba(0, 0, 0, 0.125);
+            --primary-color: #3b82f6;
+            --sidebar-width: 280px;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --code-font: 'Fira Code', monospace;
         }
 
         [data-bs-theme="dark"] {
-            --card-border-color: rgba(255, 255, 255, 0.125);
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #f8fafc;
         }
 
-        .fade-in {
-            animation: fadeIn 1s ease-in;
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bs-body-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Sidebar Styling (Matches Site) */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            padding-top: 1.5rem;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            background: var(--bs-body-bg);
+            transition: transform 0.3s ease;
+        }
+
+        [data-bs-theme="dark"] .sidebar { border-right-color: rgba(255,255,255,0.05); }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 3rem 2rem;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 5rem 1rem 2rem 1rem; }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.25rem;
+            color: var(--bs-body-color);
+            border-radius: 0.5rem;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+        }
+
+        .category-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 700;
+            padding: 0 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Form Styling */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .card {
-            transition: all 0.3s ease;
-            border-color: var(--card-border-color);
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            background: var(--bs-body-bg);
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        [data-bs-theme="dark"] .card { border-color: rgba(255,255,255,0.05); }
+
+        .form-label { font-weight: 600; color: #475569; margin-bottom: 0.5rem; }
+        [data-bs-theme="dark"] .form-label { color: #94a3b8; }
+
+        .form-control, .form-select {
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: var(--bs-body-bg);
         }
 
-        textarea {
-            resize: vertical;
+        [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select {
+            border-color: rgba(255,255,255,0.1);
         }
 
-        .theme-toggle {
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .code-textarea { font-family: var(--code-font); font-size: 0.95rem; }
+
+        .btn-primary {
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            background: var(--primary-color);
+            border: none;
+        }
+
+        /* Top Actions */
+        .top-actions {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1001;
+            display: flex;
+            gap: 0.75rem;
         }
 
-        .theme-toggle .btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            padding: 0;
+        .action-btn {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle .btn:hover {
-            transform: rotate(45deg);
-        }
-
-        /* Dark theme specific styles */
-        [data-bs-theme="dark"] .card {
-            background-color: #2b3035;
-        }
-
-        [data-bs-theme="dark"] textarea,
-        [data-bs-theme="dark"] input,
-        [data-bs-theme="dark"] select {
-            background-color: #1a1d20 !important;
-            border-color: #495057;
-            color: #e9ecef !important;
-        }
-
-        [data-bs-theme="dark"] textarea:focus,
-        [data-bs-theme="dark"] input:focus,
-        [data-bs-theme="dark"] select:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-
-        .category-select-wrapper {
-            position: relative;
-        }
-
-        .new-category-input {
-            display: none;
-            margin-top: 10px;
+            background: var(--bs-body-bg);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            color: inherit;
+            transition: all 0.2s;
         }
     </style>
 </head>
 
-<body class="bg-body">
-    <!-- Theme Toggle Button -->
-    <div class="theme-toggle animate__animated animate__fadeIn">
-        <button class="btn btn-primary shadow-lg" id="themeToggle">
+<body>
+    <!-- Top Actions -->
+    <div class="top-actions">
+        <button class="action-btn d-lg-none" id="mobileToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <button class="action-btn" id="themeToggle">
             <i class="bi bi-sun-fill" id="themeIcon"></i>
         </button>
     </div>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card shadow-lg animate__animated animate__fadeIn">
-                    <div class="card-header bg-primary text-white">
-                        <h2 class="mb-0 text-center">Create Documentation</h2>
-                    </div>
-                    <div class="card-body">
-                        <form action="/compose" method="post" class="needs-validation" novalidate>
-                            <div class="mb-4 animate__animated animate__fadeInUp">
-                                <label for="title" class="form-label">Documentation Title</label>
-                                <input type="text" class="form-control form-control-lg" id="title" name="title"
-                                    placeholder="Enter documentation title" required>
-                            </div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="px-4 mb-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="logo/bimbokdocs.ico" width="32" height="32" alt="bDoci Logo">
+                <span class="h4 mb-0 fw-bold">bDoci</span>
+            </a>
+        </div>
 
-                            <!-- Category Selection Field -->
-                            <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-                                <label for="category" class="form-label">Category</label>
-                                <div class="category-select-wrapper">
-                                    <select class="form-select form-select-lg" id="category" name="category">
-                                        <option value="">Select a category</option>
+        <div class="category-label">Admin</div>
+        <nav class="nav flex-column mb-4">
+            <a class="nav-link active" href="/admin">
+                <i class="bi bi-plus-square me-2"></i> Create Doc
+            </a>
+            <a class="nav-link" href="/">
+                <i class="bi bi-house me-2"></i> Home View
+            </a>
+        </nav>
+
+        <div class="category-label">Existing Categories</div>
+        <nav class="nav flex-column overflow-y-auto" style="max-height: calc(100vh - 300px);">
+            <% categories.forEach(function(cat) { %>
+                <div class="nav-link text-muted small">
+                    <i class="bi bi-folder2 me-2"></i> <%= cat %>
+                </div>
+            <% }); %>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="form-container">
+            <div class="mb-4">
+                <h1 class="fw-bold h2">Create New Documentation</h1>
+                <p class="text-muted">Fill in the details below to publish a new document.</p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <form action="/compose" method="post">
+                        <div class="mb-4">
+                            <label for="title" class="form-label">Document Title</label>
+                            <input type="text" class="form-control form-control-lg" id="title" name="title"
+                                placeholder="e.g., Introduction to API v2" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="category" class="form-label">Category</label>
+                            <div class="row g-2">
+                                <div class="col-sm-6">
+                                    <select class="form-select" id="category" name="category">
+                                        <option value="">Select Category...</option>
                                         <% categories.forEach(function(cat) { %>
-                                            <option value="<%= cat %>">
-                                                <%= cat %>
-                                            </option>
-                                            <% }); %>
-                                                <option value="new">+ Add New Category</option>
+                                            <option value="<%= cat %>"><%= cat %></option>
+                                        <% }); %>
+                                        <option value="new">+ Add New Category</option>
                                     </select>
-                                    <input type="text" class="form-control form-control-lg mt-2 new-category-input"
-                                        id="newCategory" name="newCategory" placeholder="Enter new category name"
-                                        style="display: none;">
-                                    <div class="form-text">
-                                        Choose an existing category or create a new one
-                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" id="newCategory" name="newCategory" 
+                                        placeholder="Enter new category name..." style="display: none;">
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-                                <label for="doc" class="form-label">Documentation Content</label>
-                                <textarea class="form-control" id="doc" name="doc" rows="8"
-                                    placeholder="Write your documentation here..." required></textarea>
-                            </div>
+                        <div class="mb-4">
+                            <label for="doc" class="form-label">Documentation Content (HTML supported)</label>
+                            <textarea class="form-control" id="doc" name="doc" rows="10"
+                                placeholder="Describe the documentation here..." required></textarea>
+                        </div>
 
-                            <div class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
-                                <label for="code" class="form-label">Code Snippet</label>
-                                <textarea class="form-control font-monospace" id="code" name="code" rows="8"
-                                    placeholder="Paste your code here..." spellcheck="false"></textarea>
-                            </div>
+                        <div class="mb-4">
+                            <label for="code" class="form-label">Code Snippet (Optional)</label>
+                            <textarea class="form-control code-textarea" id="code" name="code" rows="8"
+                                placeholder="Paste relevant code here..." spellcheck="false"></textarea>
+                        </div>
 
-                            <div class="text-center animate__animated animate__fadeInUp" style="animation-delay: 0.8s">
-                                <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
-                                    <i class="bi bi-cloud-upload"></i> Publish Documentation
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="bi bi-cloud-upload me-2"></i> Publish Document
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Theme Toggle Script -->
     <script>
+        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const html = document.documentElement;
-
-        // Check for saved theme preference
+        
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-bs-theme', savedTheme);
         updateThemeIcon(savedTheme);
-
+        
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
-
-            // Add animation to theme toggle button
-            themeToggle.classList.add('animate__animated', 'animate__rubberBand');
-            setTimeout(() => {
-                themeToggle.classList.remove('animate__animated', 'animate__rubberBand');
-            }, 1000);
         });
-
+        
         function updateThemeIcon(theme) {
             themeIcon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
         }
 
-        // Form validation
-        (() => {
-            'use strict'
-            const forms = document.querySelectorAll('.needs-validation')
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
+        // Sidebar Mobile Toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        mobileToggle.addEventListener('click', () => sidebar.classList.toggle('show'));
 
-        // Category selection logic
+        // Category Logic
         document.getElementById('category').addEventListener('change', function () {
             const newCategoryInput = document.getElementById('newCategory');
-            const categorySelect = this;
-
-            if (categorySelect.value === 'new') {
+            if (this.value === 'new') {
                 newCategoryInput.style.display = 'block';
                 newCategoryInput.setAttribute('required', 'true');
-                // Hide the select and show input for new category
-                categorySelect.style.display = 'none';
             } else {
                 newCategoryInput.style.display = 'none';
                 newCategoryInput.removeAttribute('required');
             }
-        });
-
-        // Allow switching back from new category input
-        document.getElementById('newCategory').addEventListener('focus', function () {
-            const categorySelect = document.getElementById('category');
-            if (categorySelect.value === 'new') {
-                categorySelect.style.display = 'none';
-            }
-        });
-
-        // Optional: Add button to show select again
-        document.getElementById('newCategory').insertAdjacentHTML('afterend',
-            '<button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="backToSelect" style="display: none;">← Back to categories</button>'
-        );
-
-        document.getElementById('backToSelect').addEventListener('click', function () {
-            const categorySelect = document.getElementById('category');
-            const newCategoryInput = document.getElementById('newCategory');
-
-            categorySelect.style.display = 'block';
-            newCategoryInput.style.display = 'none';
-            newCategoryInput.removeAttribute('required');
-            categorySelect.value = '';
-            this.style.display = 'none';
-        });
-
-        document.getElementById('newCategory').addEventListener('input', function () {
-            document.getElementById('backToSelect').style.display = this.value ? 'block' : 'none';
         });
     </script>
 </body>

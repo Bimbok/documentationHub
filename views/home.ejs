@@ -4,199 +4,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation Hub</title>
+    <title>bDoci - Documentation Hub</title>
     <link rel="icon" type="image/x-icon" href="logo/bimbokdocs.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
     <style>
-        .theme-toggle {
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --sidebar-width: 280px;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bs-body-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            padding-top: 1.5rem;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            background: var(--bs-body-bg);
+            transition: transform 0.3s ease, background-color 0.3s ease;
         }
 
-        .theme-toggle .btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
+        [data-bs-theme="dark"] .sidebar {
+            border-right: 1px solid rgba(255,255,255,0.05);
         }
 
-        .theme-toggle .btn:hover {
-            transform: rotate(45deg);
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.25rem;
+            color: var(--bs-body-color);
+            border-radius: 0.5rem;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-color);
+            color: white !important;
+        }
+
+        /* Card Styling */
         .doc-card {
-            transition: all 0.3s ease;
+            border: none;
+            border-radius: 1rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            height: 100%;
+            overflow: hidden;
+            background: var(--bs-body-bg);
+            border: 1px solid transparent;
+        }
+
+        [data-bs-theme="dark"] .doc-card {
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .doc-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--primary-color);
         }
 
-        .search-box {
-            max-width: 500px;
-            margin: 0 auto;
+        .doc-card .card-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
         }
 
-        /* Category filter styles */
-        .category-filter {
-            margin-bottom: 2rem;
+        .doc-card .card-text {
+            color: #64748b;
+            font-size: 0.95rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
-        .category-badge {
-            cursor: pointer;
-            transition: all 0.3s ease;
+        [data-bs-theme="dark"] .doc-card .card-text {
+            color: #94a3b8;
         }
 
-        .category-badge:hover {
+        /* Search Box */
+        .search-container {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(var(--bs-body-bg-rgb), 0.8);
+            backdrop-filter: blur(12px);
+            margin: -2rem -2rem 2rem -2rem;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        [data-bs-theme="dark"] .search-container {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 991.98px) {
+            .search-container {
+                padding-right: 8.5rem; /* Space for top-actions on mobile */
+                padding-left: 1.5rem;
+            }
+        }
+
+        .search-input-wrapper {
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input-wrapper .form-control {
+            padding-left: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            background: var(--bs-body-bg);
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+
+        [data-bs-theme="dark"] .search-input-wrapper .form-control {
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* Theme Toggle & Mobile Toggle */
+        .top-actions {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1001;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bs-body-bg);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: var(--card-shadow);
+            color: var(--bs-body-color);
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 575.98px) {
+            .top-actions {
+                top: 1.25rem;
+                right: 1rem;
+                gap: 0.5rem;
+            }
+            .action-btn {
+                width: 2.75rem;
+                height: 2.75rem;
+            }
+            .search-container {
+                padding-right: 7.5rem;
+            }
+        }
+
+        [data-bs-theme="dark"] .action-btn {
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color);
+            color: white;
             transform: scale(1.05);
         }
 
-        .category-badge.active {
-            background-color: #0d6efd !important;
-            border-color: #0d6efd !important;
-        }
-
-        /* Dark mode specific styles */
-        [data-bs-theme="dark"] {
-            --bs-body-bg: #212529;
-            --bs-body-color: #f8f9fa;
-        }
-
-        [data-bs-theme="dark"] .card {
-            background-color: #2b3035;
-            border-color: #495057;
-        }
-
-        [data-bs-theme="dark"] .bg-light {
-            background-color: #212529 !important;
-        }
-
-        [data-bs-theme="dark"] .search-box .form-control {
-            background-color: #2b3035;
-            border-color: #495057;
-            color: #f8f9fa;
-        }
-
-        [data-bs-theme="dark"] .search-box .form-control:focus {
-            background-color: #2b3035;
-            color: #f8f9fa;
+        .category-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 700;
+            padding: 0 2rem;
+            margin-bottom: 0.75rem;
         }
 
         .no-results {
             display: none;
+            padding: 4rem 2rem;
             text-align: center;
-            padding: 2rem;
         }
 
-        .doc-category {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        .no-results i {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 
-<body class="bg-light">
-    <!-- Theme Toggle Button -->
-    <div class="theme-toggle">
-        <button class="btn btn-primary shadow-lg" id="themeToggle">
+<body>
+    <!-- Top Actions -->
+    <div class="top-actions">
+        <button class="action-btn d-lg-none" id="mobileToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <button class="action-btn" id="themeToggle">
             <i class="bi bi-sun-fill" id="themeIcon"></i>
         </button>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">Documentation Hub</a>
-        </div>
-    </nav>
-
-    <div class="container py-5">
-        <!-- Category Filter -->
-        <div class="category-filter text-center mb-4">
-            <h5 class="mb-3">Filter by Category:</h5>
-            <div class="d-flex flex-wrap justify-content-center gap-2">
-                <span class="badge bg-secondary category-badge active" data-category="all">
-                    All Categories
-                </span>
-                <% categories.forEach(function(cat) { %>
-                    <span class="badge bg-primary category-badge" data-category="<%= cat %>">
-                        <%= cat %>
-                    </span>
-                    <% }); %>
-            </div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="px-4 mb-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="logo/bimbokdocs.ico" width="32" height="32" alt="bDoci Logo">
+                <span class="h4 mb-0 fw-bold">bDoci</span>
+            </a>
         </div>
 
-        <!-- Search Box -->
-        <div class="search-box mb-5">
-            <div class="input-group">
-                <span class="input-group-text bg-primary text-white">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" class="form-control form-control-lg" id="searchInput"
-                    placeholder="Search documentation..." autocomplete="off">
+        <div class="category-label">Navigation</div>
+        <nav class="nav flex-column mb-4">
+            <a class="nav-link active category-badge" href="#" data-category="all">
+                <i class="bi bi-grid me-2"></i> All Docs
+            </a>
+            <a class="nav-link" href="/admin">
+                <i class="bi bi-shield-lock me-2"></i> Admin Panel
+            </a>
+        </nav>
+
+        <div class="category-label">Categories</div>
+        <nav class="nav flex-column overflow-y-auto" style="max-height: calc(100vh - 300px);">
+            <% categories.forEach(function(cat) { %>
+                <a class="nav-link category-badge" href="#" data-category="<%= cat %>">
+                    <i class="bi bi-folder2 me-2"></i> <%= cat %>
+                </a>
+            <% }); %>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Search Header -->
+        <header class="search-container">
+            <div class="search-input-wrapper">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control" id="searchInput"
+                    placeholder="Search documentation, guides, or snippets..." autocomplete="off">
             </div>
-        </div>
+        </header>
 
         <!-- Documentation Grid -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="docsGrid">
-            <% if (documents && documents.length> 0) { %>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="docsGrid">
+            <% if (documents && documents.length > 0) { %>
                 <% documents.forEach(function(doc) { %>
                     <div class="col doc-item" data-category="<%= doc.category || 'Uncategorized' %>">
-                        <div class="card doc-card shadow-sm h-100 position-relative"
+                        <div class="card doc-card h-100"
                             onclick="window.location.href='/<%= doc.title %>'">
-                            <!-- Category Badge -->
-                            <!-- <span class="badge bg-info doc-category">
-                                <%= doc.category || 'Uncategorized' %>
-                            </span> -->
-
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-file-text me-2 text-primary"></i>
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                        <%= doc.category || 'Uncategorized' %>
+                                    </span>
+                                </div>
+                                <h5 class="card-title text-truncate" title="<%= doc.title %>">
                                     <%= doc.title %>
                                 </h5>
-                                <p class="card-text text-muted">
-                                    <%= doc.document.substring(0, 100) %>...
+                                <p class="card-text">
+                                    <%= doc.document.substring(0, 150) %>...
                                 </p>
                             </div>
-                            <div class="card-footer bg-transparent border-top-0">
-                                <small class="text-muted">
-                                    <i class="bi bi-code-square me-1"></i>
-                                    Contains code examples
-                                </small>
+                            <div class="card-footer bg-transparent border-0 px-4 pb-4">
+                                <div class="d-flex align-items-center gap-2 text-muted small">
+                                    <i class="bi bi-book"></i>
+                                    <span>Read More</span>
+                                    <% if (doc.code && doc.code.trim().length > 0) { %>
+                                        <span class="ms-auto text-primary">
+                                            <i class="bi bi-code-slash"></i> Code
+                                        </span>
+                                    <% } %>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <% }); %>
-                        <% } else { %>
-                            <div class="col-12 text-center">
-                                <div class="alert alert-info">
-                                    No documentation available yet.
-                                </div>
-                            </div>
-                            <% } %>
+                <% }); %>
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <div class="alert alert-info py-4 rounded-4 border-0 shadow-sm">
+                        <i class="bi bi-info-circle-fill d-block mb-3 fs-1 opacity-50"></i>
+                        <h5>No documentation found</h5>
+                        <p class="mb-0 text-muted">Get started by creating your first document in the admin panel.</p>
+                    </div>
+                </div>
+            <% } %>
         </div>
 
         <!-- No Results Message -->
         <div class="no-results" id="noResults">
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>
-                No matching documentation found.
-            </div>
+            <i class="bi bi-search"></i>
+            <h3>No matching results</h3>
+            <p class="text-muted">Try adjusting your search terms or filters.</p>
         </div>
-    </div>
+    </main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -207,7 +371,6 @@
         const themeIcon = document.getElementById('themeIcon');
         const html = document.documentElement;
 
-        // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-bs-theme', savedTheme);
         updateThemeIcon(savedTheme);
@@ -215,7 +378,6 @@
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
@@ -225,38 +387,50 @@
             themeIcon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
         }
 
-        // Search functionality
+        // Mobile Sidebar Toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('show');
+        });
+
+        // Close sidebar on click outside (mobile)
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 992 && !sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
+                sidebar.classList.remove('show');
+            }
+        });
+
+        // Search & Filter functionality
         const searchInput = document.getElementById('searchInput');
-        const docsGrid = document.getElementById('docsGrid');
         const noResults = document.getElementById('noResults');
         const docItems = document.querySelectorAll('.doc-item');
         const categoryBadges = document.querySelectorAll('.category-badge');
 
-        // Current filter state
         let currentCategory = 'all';
         let currentSearchTerm = '';
 
-        // Category filter functionality
         categoryBadges.forEach(badge => {
-            badge.addEventListener('click', function () {
+            badge.addEventListener('click', function (e) {
+                e.preventDefault();
                 const category = this.getAttribute('data-category');
 
-                // Update active state
                 categoryBadges.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
                 currentCategory = category;
                 filterDocuments();
+                
+                if (window.innerWidth < 992) sidebar.classList.remove('show');
             });
         });
 
-        // Search functionality
         searchInput.addEventListener('input', function (e) {
             currentSearchTerm = e.target.value.toLowerCase();
             filterDocuments();
         });
 
-        // Combined filter function
         function filterDocuments() {
             let hasResults = false;
 
@@ -265,10 +439,7 @@
                 const title = item.querySelector('.card-title').textContent.toLowerCase();
                 const content = item.querySelector('.card-text').textContent.toLowerCase();
 
-                // Check category filter
                 const categoryMatch = currentCategory === 'all' || itemCategory === currentCategory;
-
-                // Check search filter
                 const searchMatch = currentSearchTerm === '' ||
                     title.includes(currentSearchTerm) ||
                     content.includes(currentSearchTerm);
@@ -283,9 +454,6 @@
 
             noResults.style.display = hasResults ? 'none' : 'block';
         }
-
-        // Initialize filter on page load
-        filterDocuments();
     </script>
 </body>
 

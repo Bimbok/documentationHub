@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= title %> - Documentation</title>
+    <title><%= title %> - bDoci</title>
+    <link rel="icon" type="image/x-icon" href="logo/bimbokdocs.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -11,170 +19,284 @@
     <!-- Prism.js for code highlighting -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="logo/bimbokdocs.ico">
+
     <style>
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
-        
-        .documentation-content {
-            line-height: 1.8;
-            font-size: 1.1rem;
-        }
-        
-        .code-section {
-            border-radius: 8px;
-            margin: 20px 0;
-            position: relative;
-        }
-        
-        .code-section pre {
-            margin: 0;
-            border-radius: 8px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        
-        .copy-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-        
-        .copy-button:hover {
-            opacity: 1;
+        :root {
+            --primary-color: #3b82f6;
+            --sidebar-width: 280px;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --code-font: 'Fira Code', monospace;
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
+        [data-bs-theme="dark"] {
+            --bs-body-bg: #0f172a;
+            --bs-body-color: #f8fafc;
         }
-        
-        .theme-toggle .btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            padding: 0;
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bs-body-bg);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Sidebar Styling (Matches Home) */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            padding-top: 1.5rem;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            background: var(--bs-body-bg);
+            transition: transform 0.3s ease;
+        }
+
+        [data-bs-theme="dark"] .sidebar {
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 4rem 2rem;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 5rem 1rem 2rem 1rem; }
+        }
+
+        .nav-link {
+            padding: 0.75rem 1.25rem;
+            color: var(--bs-body-color);
+            border-radius: 0.5rem;
+            margin: 0.25rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--primary-color);
+        }
+
+        .category-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+            font-weight: 700;
+            padding: 0 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Top Actions */
+        .top-actions {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1001;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        
-        .theme-toggle .btn:hover {
-            transform: rotate(45deg);
-        }
-
-        /* Dark mode specific styles */
-        [data-bs-theme="dark"] {
-            --bs-body-bg: #212529;
-            --bs-body-color: #f8f9fa;
+            background: var(--bs-body-bg);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            color: var(--bs-body-color);
+            transition: all 0.2s ease;
         }
 
-        [data-bs-theme="dark"] .card {
-            background-color: #2b3035;
-            border-color: #495057;
+        [data-bs-theme="dark"] .action-btn { border-color: rgba(255,255,255,0.1); }
+        .action-btn:hover { background: var(--primary-color); color: white; transform: scale(1.05); }
+
+        /* Documentation Content Styling */
+        .doc-container {
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        [data-bs-theme="dark"] .bg-light {
-            background-color: #212529 !important;
+        .doc-header {
+            margin-bottom: 3rem;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 2rem;
         }
 
-        /* Custom scrollbar for code blocks */
-        pre::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        [data-bs-theme="dark"] .doc-header { border-bottom-color: rgba(255,255,255,0.05); }
+
+        .documentation-content {
+            line-height: 1.8;
+            font-size: 1.15rem;
+            color: #334155;
         }
 
-        pre::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+        [data-bs-theme="dark"] .documentation-content { color: #cbd5e1; }
+
+        .documentation-content p { margin-bottom: 1.5rem; }
+
+        /* Code Section Styling */
+        .code-section {
+            background: #1e293b;
+            border-radius: 1rem;
+            margin: 2.5rem 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
         }
 
-        pre::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
+        .code-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        pre::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .copy-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
 
-        [data-bs-theme="dark"] pre::-webkit-scrollbar-track {
-            background: #343a40;
+        .copy-button:hover { background: var(--primary-color); border-color: var(--primary-color); }
+
+        pre[class*="language-"] {
+            margin: 0 !important;
+            padding: 1.5rem !important;
+            background: transparent !important;
+            font-family: var(--code-font) !important;
+            font-size: 0.95rem !important;
         }
 
-        [data-bs-theme="dark"] pre::-webkit-scrollbar-thumb {
-            background: #495057;
-        }
-
-        [data-bs-theme="dark"] pre::-webkit-scrollbar-thumb:hover {
-            background: #6c757d;
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
         }
     </style>
 </head>
-<body class="bg-light">
-    <!-- Theme Toggle Button -->
-    <div class="theme-toggle">
-        <button class="btn btn-primary shadow-lg" id="themeToggle">
+
+<body>
+    <!-- Top Actions -->
+    <div class="top-actions">
+        <button class="action-btn d-lg-none" id="mobileToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <button class="action-btn" id="themeToggle">
             <i class="bi bi-sun-fill" id="themeIcon"></i>
         </button>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">Documentation</a>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="px-4 mb-4">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+                <img src="logo/bimbokdocs.ico" width="32" height="32" alt="bDoci Logo">
+                <span class="h4 mb-0 fw-bold">bDoci</span>
+            </a>
         </div>
-    </nav>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h1 class="display-5 mb-4"><%= title %></h1>
-                        
-                        <!-- Documentation Content -->
-                        <div class="documentation-content mb-5">
-                            <%- documentation %>
-                        </div>
+        <div class="category-label">Navigation</div>
+        <nav class="nav flex-column mb-4">
+            <a class="nav-link" href="/">
+                <i class="bi bi-arrow-left me-2"></i> Back to Hub
+            </a>
+            <a class="nav-link" href="/admin">
+                <i class="bi bi-shield-lock me-2"></i> Admin Panel
+            </a>
+        </nav>
 
-                        <!-- Code Section -->
-                        <% if (code && code.trim().length > 0) { %>
-                        <div class="code-section">
-                            <button class="btn btn-sm btn-secondary copy-button" 
-                                    onclick="copyCode(this)">
-                                Copy Code
-                            </button>
-                            <pre class="line-numbers"><code class="language-javascript"><%= code %></code></pre>
-                        </div>
-                        <% } %>
+        <div class="category-label">Categories</div>
+        <nav class="nav flex-column overflow-y-auto" style="max-height: calc(100vh - 300px);">
+            <% categories.forEach(function(cat) { %>
+                <a class="nav-link <%= category === cat ? 'active' : '' %>" href="/?category=<%= cat %>">
+                    <i class="bi bi-folder2 me-2"></i> <%= cat %>
+                </a>
+            <% }); %>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="doc-container">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Docs</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><%= category || 'Uncategorized' %></li>
+                </ol>
+            </nav>
+
+            <header class="doc-header">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 mb-3">
+                    <%= category || 'Uncategorized' %>
+                </span>
+                <h1 class="display-4 fw-bold mb-3"><%= title %></h1>
+                <div class="d-flex align-items-center gap-3 text-muted">
+                    <div class="d-flex align-items-center gap-1">
+                        <i class="bi bi-clock"></i>
+                        <span>Last updated recently</span>
                     </div>
                 </div>
+            </header>
+            
+            <div class="documentation-content">
+                <%- documentation %>
             </div>
+
+            <% if (code && code.trim().length > 0) { %>
+                <div class="code-section">
+                    <div class="code-header">
+                        <div class="d-flex align-items-center gap-2 text-white-50 small">
+                            <i class="bi bi-code-slash"></i>
+                            <span>Code Snippet</span>
+                        </div>
+                        <button class="copy-button" onclick="copyCode(this)">
+                            <i class="bi bi-clipboard me-1"></i> Copy
+                        </button>
+                    </div>
+                    <pre class="line-numbers"><code class="language-javascript"><%= code %></code></pre>
+                </div>
+            <% } %>
+
+            <footer class="mt-5 pt-5 border-top opacity-50 small">
+                <div class="d-flex justify-content-between">
+                    <p>&copy; 2024 bDoci Documentation Hub</p>
+                    <p>Built with Node.js & MongoDB</p>
+                </div>
+            </footer>
         </div>
-    </div>
+    </main>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Prism.js for code highlighting -->
+    <!-- Prism.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     
     <script>
-        // Theme Toggle Logic
+        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const html = document.documentElement;
         
-        // Check for saved theme preference
         const savedTheme = localStorage.getItem('theme') || 'light';
         html.setAttribute('data-bs-theme', savedTheme);
         updateThemeIcon(savedTheme);
@@ -182,7 +304,6 @@
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.getAttribute('data-bs-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
             html.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             updateThemeIcon(newTheme);
@@ -192,23 +313,27 @@
             themeIcon.className = theme === 'light' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
         }
 
-        // Code Copy Logic
+        // Mobile Toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const sidebar = document.getElementById('sidebar');
+        mobileToggle.addEventListener('click', () => sidebar.classList.toggle('show'));
+
+        // Copy Logic
         function copyCode(button) {
-            const codeBlock = button.nextElementSibling.querySelector('code');
+            const codeBlock = button.closest('.code-section').querySelector('code');
             const text = codeBlock.textContent;
             
             navigator.clipboard.writeText(text).then(() => {
-                button.textContent = 'Copied!';
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+                button.classList.add('btn-success');
                 setTimeout(() => {
-                    button.textContent = 'Copy Code';
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('btn-success');
                 }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                button.textContent = 'Failed to copy';
             });
         }
 
-        // Initialize Prism.js
         Prism.highlightAll();
     </script>
 </body>
