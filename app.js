@@ -64,6 +64,14 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
+const linkify = (text) => {
+    if (!text) return "";
+    // Regex to find URLs not already inside href/src attributes
+    return text.replace(/(?<!href="|src=")(https?:\/\/[^\s<]+(?<![.,?!]))/g, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+};
+
 app.get("/", async (req, res) => {
     try {
         const { category } = req.query;
@@ -132,7 +140,7 @@ app.get("/:title", async (req, res) => {
 
         res.render("index", {
             title: document.title,
-            documentation: document.document,
+            documentation: linkify(document.document),
             code: document.code,
             category: document.category,
         });
