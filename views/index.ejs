@@ -146,6 +146,32 @@
 
         .documentation-content p { margin-bottom: 1.5rem; }
 
+        /* Documentation Links Styling */
+        .doc-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            word-break: break-all;
+        }
+
+        .doc-link:hover {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 0 2px;
+            border-radius: 4px;
+        }
+
+        .doc-link i {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
         /* Code Section Styling */
         .code-section {
             background: #1e293b;
