@@ -107,6 +107,17 @@ app.get("/", async (req, res) => {
   }
 });
 
+// Endpoint to return all raw document data
+app.get("/api/data", async (req, res) => {
+  try {
+    const allData = await Doc.find({});
+    res.json(allData);
+  } catch (error) {
+    console.error("Error fetching all data:", error);
+    res.status(500).json({ error: "Error fetching data" });
+  }
+});
+
 app.get("/admin", (req, res) => {
   res.render("admin/admin");
 });
