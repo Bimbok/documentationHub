@@ -4,7 +4,22 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const path = require("path");
+const admin = require("firebase-admin");
 
+if (!admin.apps.length && process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log("Firebase Admin initialized successfully.");
+  } catch (error) {
+    console.error(
+      "Firebase Admin init error. Check your JSON format in Vercel:",
+      error,
+    );
+  }
+}
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("views", path.join(__dirname, "views"));
@@ -147,6 +162,24 @@ app.post("/compose", async (req, res) => {
       category: req.body.newCategory || "Uncategorized",
     });
     await document.save();
+    if (admin.apps.length) {
+      try {
+        const message = {
+          notification: {
+            title: "New Note Uploaded! 🎉",
+            body: `Check out: ${document.title} in ${document.category}`,
+          },
+          topic: "new_docs",
+        };
+        // Send the push notification
+        await admin.messaging().send(message);
+        console.log(`Notification sent for: ${document.title}`);
+      } catch (fcmError) {
+        console.error("Failed to send Firebase notification:", fcmError);
+        // Notice we don't crash the server here. If the notification fails,
+        // the document is still saved safely in MongoDB.
+      }
+    }
     res.render("admin/compose");
   } catch (error) {
     console.error("Error saving document:", error);
